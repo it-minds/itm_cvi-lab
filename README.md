@@ -1,8 +1,21 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Projektstruktur
 
-## Getting Started
+Projektet består af en frontend (dette projekt) og en backend (https://github.com/it-minds/itm_cvi-lab-backend), hvor stacken primært er farvet af, at det startede som et projekt til at skabe overblik over sammenhængen mellem specifikke teknologier. 
 
-First, run the development server:
+Projektet bunder dog i en stack, som fint understøtter det simple krav om, at man som designer nemt skal kunne tilføje nye resourcer, som kan blive vist på en statisk hjemmeside, med høj responstid og nem UX, så man hurtigt og nemt kan finde de fornødne resourcer til sit projekt.
+
+Stacken er:
+
+- Backend: **.NET 8**
+- Backoffice: **Umbraco 14.0.0**
+- Index: **Elasticsearch**/**Kibana** (containerized)
+- Frontend: **NextJS**
+
+## Opsætning
+
+### Frontend
+
+Projektet er sat op helt klassisk, og er derfor selvfølgelig bare bootstrapped med [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app), så for at komme i gang starter man bare development serveren med:
 
 ```bash
 npm run dev
@@ -14,23 +27,27 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Herefter kan man åbne løsningen i sin browser på [http://localhost:3000](http://localhost:3000). Det er dog vigtigt at nævne, at frontenden er afhængig af, at Elasticsearch containeren kører, da den får alle resourcer gennem Elasticsearch ved load.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Backend
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Da der ikke på nuværende tidspunkt er en docker-compose til projektet er opsætningen af containers gjort manuelt. Dette skyldes, opsætningen af Kibana, som bruges til at skabe overblik over sit index, kræver en key fra Elasticsearch som først genereres, når Elasticsearch containeren sættes op. Derfor er opsætning af dette følgende:
 
-## Learn More
+**Opsætning af Elasticsearch**:
 
-To learn more about Next.js, take a look at the following resources:
+1. Kør kommandoen `docker network create elastic`
+2. Kør kommandoen `docker pull docker.elastic.co/elasticsearch/elasticsearch:8.13.4`
+3. Kør kommandoen `docker run --name elasticsearch --net elastic -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -t docker.elastic.co/elasticsearch/elasticsearch:8.13.4`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Opsætning af Kibana**:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+4. Kør kommandoen `docker pull docker.elastic.co/kibana/kibana:8.13.4`
+5. Kør kommandoen `docker run --name kibana --net elastic -p 5601:5601 docker.elastic.co/kibana/kibana:8.13.4`
 
-## Deploy on Vercel
+**Sammenkobling af Elasticsearch og Kibana**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+6. Tilgå `http://localhost:5601/`
+7. Indsæt **enrollment token** fra log i Elasticsearch containeren.
+8. Indsæt **verification code** fra log i Kibana containeren.
+9. Brug `elastic` som brugernavn og kodeord fra log i Elasticsearch containeren.
+10. Tilføj ovenstående til SearchService.tsx, categories/route.tsx, search/route.tsx og ElasticsearchIndexService.cs.
