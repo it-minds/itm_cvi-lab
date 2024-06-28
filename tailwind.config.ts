@@ -9,8 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        headline: ['"Bookman Old Style"', 'serif'],
-        body: ['"Franklin Gothic"', 'sans-serif'],
+        headline: ['"Bookman Old Style"', "serif"],
+        body: ['"Franklin Gothic"', "sans-serif"],
+      },
+      colors: {
+        "twoday-light-green": "#00e277",
+        "twoday-light-blue": "#009ce9",
+        "twoday-light-orange": "#ffbc57",
       },
     },
   },
